@@ -1,8 +1,11 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
-// base "./" lets the built site work from a sub-path such as GitHub Pages (user.github.io/<repo>/).
+// https://vitejs.dev/config/
 export default defineConfig({
-  base: "./",
   plugins: [react()],
+  server: {
+    host: true,
+    allowedHosts: true, // Allows all CodeSandbox preview domains
+  },
 });
