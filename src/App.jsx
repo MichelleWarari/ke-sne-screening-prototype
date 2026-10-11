@@ -1,3 +1,4 @@
+
 /* CBC SNE Screener: single-file App.jsx
  * Dependencies (CodeSandbox / StackBlitz install these automatically from the imports):
  *   react, react-dom, dexie, jspdf, @fontsource/lexend, @fontsource/opendyslexic
@@ -132,11 +133,11 @@ const MAX_SPAN = 6; // digit-span ceiling used for the 0-100 score
 
 const TESTS = [
   { n: 1, key: "subitizing", domain: "dyscalculia", built: true, title: "Subitizing & Dot Comparison", desc: "Rapid quantity recognition without counting (1-6 dots), with reaction times." },
-  { n: 2, key: "mapping", domain: "dyscalculia", title: "Symbol-Quantity Mapping", desc: "Match numerals 1-20 to dot arrangements and ten-frames." },
-  { n: 3, key: "arithmetic", domain: "dyscalculia", title: "Single-Digit Arithmetic Fluency", desc: "Addition and subtraction response speed." },
-  { n: 4, key: "nonword", domain: "dyslexia", title: "Nonsense Word Decoding", desc: "Decode unfamiliar pseudo-words." },
-  { n: 5, key: "phoneme", domain: "dyslexia", title: "Phoneme Deletion & Manipulation", desc: "Sound segmentation and onset extraction." },
-  { n: 6, key: "ran", domain: "dyslexia", title: "Rapid Automatized Naming (RAN)", desc: "Visual-verbal retrieval speed." },
+  { n: 2, key: "mapping", domain: "dyscalculia", built: true, title: "Symbol-Quantity Mapping", desc: "Match numerals 1-20 to dot arrangements and ten-frames." },
+  { n: 3, key: "arithmetic", domain: "dyscalculia", built: true, title: "Single-Digit Arithmetic Fluency", desc: "Addition and subtraction response speed." },
+  { n: 4, key: "nonword", domain: "dyslexia", built: true, title: "Nonsense Word Decoding", desc: "Decode unfamiliar pseudo-words." },
+  { n: 5, key: "phoneme", domain: "dyslexia", built: true, title: "Phoneme Deletion & Manipulation", desc: "Sound segmentation and onset extraction." },
+  { n: 6, key: "ran", domain: "dyslexia", built: true, title: "Rapid Automatized Naming (RAN)", desc: "Visual-verbal retrieval speed." },
   { n: 7, key: "digitspan", domain: "memory", built: true, title: "Digit Span Memory", desc: "Forward digit span using spoken English / Kiswahili digits." },
 ];
 const DOMAINS = [
@@ -608,6 +609,7 @@ const CSS = `
 .hdr{position:sticky;top:0;z-index:20;background:rgba(239,254,228,.94);backdrop-filter:blur(8px);padding:8px 16px;box-shadow:0 2px 12px rgba(28,40,24,.07)}
 .row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}.wrap{flex-wrap:wrap}.grow{flex:1;min-width:0}
 .brand{font-weight:700;font-size:18px;line-height:1.3}.sub{font-size:12px;color:var(--mute);line-height:1.3}
+@media (max-width:480px){.sub{display:none}.hdr .pill{font-size:11px;padding:2px 10px}.hdr .pill.btn{min-height:36px}}
 .pill{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:999px;background:var(--accent);font-size:12px;font-weight:600;min-height:32px}
 .pill.off{background:var(--rose)}.pill.btn{background:var(--card-hi);box-shadow:0 2px 0 var(--line);min-height:40px}.pill.btn[aria-pressed=true]{background:var(--accent-dk)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--primary)}
@@ -647,6 +649,11 @@ p{margin:0}.small{font-size:13px;color:var(--mute);line-height:1.5}.tag{font-siz
 .acc{background:var(--card-lo);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:8px}.acc.off{opacity:.6}
 .warn{background:var(--rose);color:#33110f;border-radius:12px;padding:10px 14px;font-size:13px}
 .chips{display:flex;gap:8px;flex-wrap:wrap}.chip{padding:8px 14px;border-radius:12px;background:var(--card-hi);font-size:13px;min-height:44px;font-weight:600}.chip[aria-pressed=true]{background:var(--primary);color:#fff}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:420px}.optscol{display:flex;flex-direction:column;gap:12px;width:100%;max-width:420px}
+.opt{min-height:72px;border-radius:16px;background:var(--stim);font-size:30px;font-weight:700;box-shadow:0 4px 0 var(--line);padding:8px}.opt:active{transform:translateY(4px);box-shadow:none}.opt[disabled]{opacity:.7}
+.optrow{display:flex;gap:8px}.optrow .opt{flex:1}.mini{min-width:64px;min-height:64px;border-radius:16px;background:var(--rose);font-size:22px;box-shadow:0 3px 0 var(--rose-dk)}
+.ran{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;width:100%;max-width:420px}.ran>span{height:48px;display:grid;place-items:center;font-size:28px;font-weight:700;background:var(--stim);border-radius:10px}
+.ran.mask>span{filter:blur(9px);opacity:.5}.word{font-size:56px;font-weight:700;text-align:center;word-break:break-word}
 .big{font-size:56px;font-weight:700;color:var(--primary);line-height:1}
 `;
 
@@ -886,10 +893,7 @@ function SubitizingTest({ speech, onComplete, onExit }) {
           <div className="card lo"><div className="big">{summary.medianRtMs ?? "-"}</div><p className="small">median ms (correct)</p></div>
         </div>
         {summary.anticipatory > 0 && <p className="small">{summary.anticipatory} very fast tap(s) under 200 ms were excluded from timing.</p>}
-        <div className="row wrap" style={{ justifyContent: "center", marginTop: 12 }}>
-          <button className="btn ghost" onClick={onExit}>Back to dashboard</button>
-          <button className="btn" onClick={() => onExit("digitspan")}>Next: Digit Span →</button>
-        </div>
+        <DoneButtons testKey="subitizing" onExit={onExit} />
       </section>
     );
 
@@ -1105,10 +1109,7 @@ function DigitSpanTest({ speech, onComplete, onExit }) {
         <h1>Asante sana! Thank you 🌟</h1>
         <div className="card lo" style={{ margin: "16px 0" }}><div className="big">{summary.span}</div><p className="small">digits in the longest correct forward sequence</p></div>
         <p className="small">Saved on this device.</p>
-        <div className="row wrap" style={{ justifyContent: "center", marginTop: 12 }}>
-          <button className="btn ghost" onClick={() => onExit()}>Back to dashboard</button>
-          <button className="btn" onClick={() => onExit("report")}>See IEP / EARC →</button>
-        </div>
+        <DoneButtons testKey="digitspan" onExit={onExit} />
       </section>
     );
 
@@ -1162,6 +1163,527 @@ function DigitSpanTest({ speech, onComplete, onExit }) {
     </>
   );
 }
+
+/* ---------- Shared pieces for tests 2-6 ---------- */
+const NEXT = { subitizing: "mapping", mapping: "arithmetic", arithmetic: "nonword", nonword: "phoneme", phoneme: "ran", ran: "digitspan", digitspan: "report" };
+
+function DoneButtons({ testKey, onExit }) {
+  const nk = NEXT[testKey];
+  const nt = TESTS.find((t) => t.key === nk);
+  return (
+    <div className="row wrap" style={{ justifyContent: "center", marginTop: 12 }}>
+      <button className="btn ghost" onClick={() => onExit()}>Back to dashboard</button>
+      <button className="btn" onClick={() => onExit(nk)}>{nt ? `Next: ${nt.title} →` : "See IEP / EARC →"}</button>
+    </div>
+  );
+}
+
+function numberOptions(ans, min, max, count = 4) {
+  const set = new Set([ans]);
+  const near = shuffle([ans - 2, ans - 1, ans + 1, ans + 2]).filter((v) => v >= min && v <= max);
+  for (const v of near) if (set.size < count) set.add(v);
+  while (set.size < count) set.add(min + Math.floor(Math.random() * (max - min + 1)));
+  return shuffle([...set]).map((v) => ({ label: String(v), value: v }));
+}
+
+/* Generic timed multiple-choice test (tests 2, 3 and 5 are configs of this). */
+function ChoiceTest({ cfg, speech, onComplete, onExit }) {
+  const [items, setItems] = useState(null);
+  const [idx, setIdx] = useState(0);
+  const [phase, setPhase] = useState("intro"); // intro | blank | speaking | stim | feedback | paused | done
+  const [t0, setT0] = useState(null);
+  const [summary, setSummary] = useState(null);
+  const [liveMs, setLiveMs] = useState(null);
+  const trialsRef = useRef([]);
+  const resumeRef = useRef("repeat");
+  const replayedRef = useRef(false);
+  const audioOK = speech.supported && speech.enabled;
+  const prompt = { en: cfg.promptEn, sw: cfg.promptSw };
+
+  const start = () => {
+    trialsRef.current = [];
+    setItems(cfg.buildItems(speech.effLang));
+    setIdx(0);
+    setT0(null);
+    setPhase("blank");
+  };
+
+  useEffect(() => {
+    if (phase === "blank") {
+      setT0(null);
+      replayedRef.current = false;
+      const id = setTimeout(() => setPhase(cfg.autoSpeak ? "speaking" : "stim"), 450);
+      return () => clearTimeout(id);
+    }
+    if (phase === "speaking") {
+      let cancelled = false;
+      (async () => {
+        await speech.speak(cfg.itemSpeech(items[idx]), { rate: 0.8 });
+        await sleep(200);
+        if (!cancelled) setPhase("stim");
+      })();
+      return () => { cancelled = true; speech.stop(); };
+    }
+    if (phase === "stim") return stampOnset(setT0); // timing starts after the item is painted (and spoken)
+    if (phase === "feedback") {
+      const id = setTimeout(() => advance(), 650);
+      return () => clearTimeout(id);
+    }
+    return undefined;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, idx]);
+
+  const advance = () => {
+    if (idx + 1 < items.length) { setIdx(idx + 1); setPhase("blank"); } else finish();
+  };
+
+  const answer = (opt, e) => {
+    if (phase !== "stim" || t0 === null) return;
+    const rt = reactionMs(e, t0);
+    const item = items[idx];
+    trialsRef.current.push({
+      itemIndex: idx, practice: !!item.practice, answer: String(item.answer), choice: String(opt.value),
+      correct: opt.value === item.answer, rtMs: rt, anticipatory: rt < 200, replayed: replayedRef.current, at: Date.now(),
+    });
+    setLiveMs(rt);
+    setPhase("feedback");
+  };
+
+  const finish = () => {
+    const scored = trialsRef.current.filter((t) => !t.practice);
+    const correct = scored.filter((t) => t.correct);
+    const valid = correct.filter((t) => !t.anticipatory).map((t) => t.rtMs);
+    const med = median(valid);
+    const s = {
+      score: scored.length ? Math.round((correct.length / scored.length) * 100) : 0,
+      correct: correct.length, total: scored.length, medianRtMs: med === null ? null : Math.round(med),
+      anticipatory: scored.filter((t) => t.anticipatory).length,
+      audio: cfg.autoSpeak ? (audioOK ? speech.effLang : "unavailable") : undefined,
+    };
+    s.note = `${s.correct}/${s.total} correct${s.medianRtMs ? `, median ${s.medianRtMs} ms` : ""}${cfg.autoSpeak && !audioOK ? " (audio unavailable: not valid)" : ""}`;
+    setSummary(s);
+    setPhase("done");
+    onComplete(cfg.key, s, trialsRef.current);
+  };
+
+  const pause = () => { resumeRef.current = phase === "feedback" ? "next" : "repeat"; speech.stop(); setPhase("paused"); };
+  const resume = () => (resumeRef.current === "next" ? advance() : setPhase("blank"));
+  const replay = () => { if (phase === "stim") { replayedRef.current = true; speech.speak(cfg.itemSpeech(items[idx]), { rate: 0.8 }); } };
+
+  const item = items && items[idx];
+  const scoredTotal = items ? items.filter((i) => !i.practice).length : 0;
+  const scoredIdx = item ? items.slice(0, idx + 1).filter((i) => !i.practice).length : 0;
+
+  if (phase === "intro")
+    return (
+      <section className="card stage" style={{ textAlign: "center" }}>
+        <span className="tag">Test {cfg.n} of 7 · {cfg.tag}</span>
+        <h1 style={{ margin: "8px 0" }}>{cfg.title}</h1>
+        <p>{cfg.introSw}</p>
+        <p className="small" style={{ marginBottom: 16 }}>{cfg.introEn}</p>
+        <div className="row wrap" style={{ justifyContent: "center" }}>
+          <button className="btn rose" onClick={() => speech.say(prompt)}>🔊 Sikiliza (Listen)</button>
+          <button className="btn" onClick={start}>Anza (Start) →</button>
+        </div>
+        {cfg.autoSpeak && !audioOK && <p className="warn" style={{ marginTop: 12 }}>This test is read aloud. Audio is off or unsupported here, so results would not be valid. Turn Audio on or use a device with speech.</p>}
+        {speech.swMissing && <p className="warn" style={{ marginTop: 12 }}>No Kiswahili voice found on this device: audio and the item set fall back to English.</p>}
+      </section>
+    );
+
+  if (phase === "done")
+    return (
+      <section className="card stage" style={{ textAlign: "center" }}>
+        <h1>Hongera! Well done 🌟</h1>
+        <p className="small">Test {cfg.n} saved on this device.</p>
+        <div className="grid2" style={{ margin: "16px 0" }}>
+          <div className="card lo"><div className="big">{summary.correct}/{summary.total}</div><p className="small">correct</p></div>
+          <div className="card lo"><div className="big">{summary.medianRtMs ?? "-"}</div><p className="small">median ms (correct)</p></div>
+        </div>
+        <DoneButtons testKey={cfg.key} onExit={onExit} />
+      </section>
+    );
+
+  const showStim = cfg.showStimIn.includes(phase);
+  return (
+    <>
+      <section className="card">
+        <div className="row between">
+          <div className="grow"><span className="tag">{cfg.tag}</span><h2>Test {cfg.n} of 7: {cfg.title}</h2></div>
+          <span className="pill" style={{ background: "var(--accent-dk)" }}>{item?.practice ? "Practice" : `Item ${scoredIdx} / ${scoredTotal}`}</span>
+        </div>
+        <div className="bar" style={{ margin: "10px 0" }}><i style={{ width: `${Math.round((idx / items.length) * 100)}%` }} /></div>
+        <div className="row">
+          <button className="btn rose grow" onClick={() => speech.say(prompt)}>🔊 Sikiliza Maelekezo</button>
+          <button className="btn ghost" onClick={pause} disabled={phase === "paused"} aria-label="Pause">⏸ Pumzika</button>
+        </div>
+      </section>
+
+      <section className="card stage" style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center", minHeight: 380 }}>
+        <h1 style={{ textAlign: "center" }}>{cfg.promptSw}</h1>
+        <p className="small" style={{ textAlign: "center" }}>{cfg.promptEn}</p>
+        {phase === "paused" ? (
+          <div style={{ textAlign: "center", padding: 24 }}>
+            <p style={{ marginBottom: 12 }}>Imesimama (Paused). This item will restart.</p>
+            <button className="btn" onClick={resume}>▶ Endelea (Resume)</button>
+          </div>
+        ) : (
+          <>
+            <div style={{ minHeight: 130, display: "grid", placeItems: "center", width: "100%" }}>
+              {phase === "speaking" && <div className="wave" aria-hidden="true">{Array.from({ length: 11 }).map((_, i) => <i key={i} />)}</div>}
+              {showStim && item && cfg.renderStim(item)}
+            </div>
+            <div className={cfg.optionAudio ? "optscol" : "opts"} role="group" aria-label="Answers">
+              {item && phase !== "blank" && item.options.map((o) => {
+                const btn = (
+                  <button key={String(o.value)} className="opt" disabled={phase !== "stim"} onPointerDown={(e) => answer(o, e)}
+                    onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && phase === "stim" && t0 !== null) { e.preventDefault(); answer(o, e.nativeEvent); } }}>
+                    {o.label}
+                  </button>
+                );
+                return cfg.optionAudio ? (
+                  <div key={String(o.value)} className="optrow">
+                    {btn}
+                    <button className="mini" disabled={phase !== "stim"} aria-label={`Hear ${o.label}`} onClick={() => speech.speak(o.label, { rate: 0.8 })}>🔊</button>
+                  </div>
+                ) : btn;
+              })}
+            </div>
+            {cfg.itemSpeech && phase === "stim" && <button className="btn rose" onClick={replay}>🔊 {cfg.autoSpeak ? "Rudia (Replay)" : "Sikiliza (Listen)"}</button>}
+          </>
+        )}
+        <div className="pill" style={{ background: "#fff8", minHeight: 40 }} role="status">
+          {phase === "feedback" ? `Jibu limehifadhiwa ✓ · Kasi: ${(liveMs / 1000).toFixed(2)}s` : phase === "stim" ? "Chagua sasa! (Choose now)" : phase === "speaking" ? "Sikiliza… (Listen)" : "Tayari… (Get ready)"}
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ---------- Test 2: Symbol-quantity mapping ---------- */
+function TenFrames({ n }) {
+  const frames = Math.ceil(n / 10);
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 8 }} aria-hidden="true">
+      {Array.from({ length: frames }).map((_, f) => {
+        const filled = Math.min(10, n - f * 10);
+        return (
+          <svg key={f} viewBox="0 0 110 46" width="165" height="69">
+            <rect x="1" y="1" width="108" height="44" rx="6" fill="#f8fbee" stroke="#131f0f" strokeWidth="2" />
+            {Array.from({ length: 10 }).map((_, i) => {
+              const cx = 11 + (i % 5) * 22, cy = 12 + Math.floor(i / 5) * 22;
+              return <g key={i}><rect x={cx - 9} y={cy - 9} width="18" height="18" rx="3" fill="none" stroke="#c8c7b5" />{i < filled && <circle cx={cx} cy={cy} r="7" fill="#131f0f" />}</g>;
+            })}
+          </svg>
+        );
+      })}
+    </div>
+  );
+}
+
+const MAPPING_CFG = {
+  key: "mapping", n: 2, tag: "CBC Math · Number Concept", title: "Symbol-Quantity Mapping",
+  promptSw: "Chagua nambari inayolingana na nukta.", promptEn: "Pick the number that matches the dots.",
+  introSw: "Angalia nukta, kisha gusa nambari sahihi.", introEn: "Look at the dots, then tap the matching number. 2 practice items, then 12 scored items.",
+  showStimIn: ["stim"],
+  buildItems() {
+    const mk = (n, practice) => {
+      const frame = n > 6 ? Math.random() < 0.6 : Math.random() < 0.5;
+      return { practice, n, frame, dots: frame ? null : scatterDots(n, 112, 8, 4), answer: n, options: numberOptions(n, 1, 20) };
+    };
+    const pool = shuffle(Array.from({ length: 20 }, (_, i) => i + 1).filter((v) => v !== 3 && v !== 8)).slice(0, 12);
+    return [mk(3, true), mk(8, true), ...pool.map((n) => mk(n, false))];
+  },
+  renderStim: (it) =>
+    it.frame ? <TenFrames n={it.n} /> : (
+      <svg viewBox="0 0 112 112" width="112" height="112" aria-hidden="true">{it.dots.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r="8" fill="#131f0f" />)}</svg>
+    ),
+};
+
+/* ---------- Test 3: Single-digit arithmetic fluency ---------- */
+const sym = (op) => (op === "+" ? "+" : "−");
+const ARITH_CFG = {
+  key: "arithmetic", n: 3, tag: "CBC Math · Operations", title: "Arithmetic Fluency",
+  promptSw: "Chagua jibu sahihi haraka.", promptEn: "Pick the correct answer, as fast as you can.",
+  introSw: "Jumlisha na toa. Gusa jibu sahihi.", introEn: "Quick additions and subtractions. Tap the answer. You can press Listen to hear the sum read aloud.",
+  showStimIn: ["stim"],
+  itemSpeech: (it) => it.say,
+  buildItems(lang) {
+    const word = (d) => DIGIT_WORDS[lang][d];
+    const mk = (op, a, b, practice) => {
+      const ans = op === "+" ? a + b : a - b;
+      const say = op === "+" ? (lang === "sw" ? `${word(a)} jumlisha ${word(b)}` : `${word(a)} plus ${word(b)}`) : lang === "sw" ? `${word(a)} toa ${word(b)}` : `${word(a)} minus ${word(b)}`;
+      return { practice, op, a, b, answer: ans, say, options: numberOptions(ans, 0, 18) };
+    };
+    const adds = shuffle(Array.from({ length: 9 }, (_, i) => i + 1).flatMap((a) => Array.from({ length: 9 }, (_, j) => [a, j + 1]))).filter(([a, b]) => a + b <= 14 && a + b >= 4).slice(0, 6);
+    const subs = shuffle(Array.from({ length: 7 }, (_, i) => i + 3).flatMap((a) => Array.from({ length: a - 1 }, (_, j) => [a, j + 1]))).slice(0, 6);
+    const real = shuffle([...adds.map(([a, b]) => mk("+", a, b)), ...subs.map(([a, b]) => mk("-", a, b))]);
+    return [mk("+", 2, 3, true), mk("-", 6, 2, true), ...real];
+  },
+  renderStim: (it) => <div className="word" style={{ fontSize: 52 }}>{it.a} {sym(it.op)} {it.b} = ?</div>,
+};
+
+/* ---------- Test 5: Phoneme / syllable deletion (read aloud) ---------- */
+// Review the Kiswahili set with a native-speaker teacher before real use.
+const PHONEME_SETS = {
+  en: [
+    { practice: true, say: "Say sunset. Now say it without sun.", answer: "set", options: ["set", "sun", "sunset"] },
+    { practice: true, say: "Say football. Now say it without foot.", answer: "ball", options: ["ball", "foot", "football"] },
+    { say: "Say cowboy. Now say it without cow.", answer: "boy", options: ["boy", "cow", "cowboy"] },
+    { say: "Say rainbow. Now say it without rain.", answer: "bow", options: ["bow", "rain", "rainbow"] },
+    { say: "Say starfish. Now say it without star.", answer: "fish", options: ["fish", "star", "starfish"] },
+    { say: "Say airplane. Now say it without air.", answer: "plane", options: ["plane", "air", "airplane"] },
+    { say: "Say stop. Now say it without the first sound.", answer: "top", options: ["top", "stop", "sop"] },
+    { say: "Say plate. Now say it without the first sound.", answer: "late", options: ["late", "plate", "pate"] },
+    { say: "Say bread. Now say it without the first sound.", answer: "read", options: ["read", "bread", "bed"] },
+    { say: "Say smile. Now say it without the first sound.", answer: "mile", options: ["mile", "smile", "small"] },
+    { say: "Say clap. Now say it without the first sound.", answer: "lap", options: ["lap", "clap", "cap"] },
+    { say: "Say flip. Now say it without the first sound.", answer: "lip", options: ["lip", "flip", "flap"] },
+    { say: "Say brain. Now say it without the first sound.", answer: "rain", options: ["rain", "brain", "bran"] },
+    { say: "Say cart. Now say it without the first sound.", answer: "art", options: ["art", "cart", "car"] },
+  ],
+  sw: [
+    { practice: true, say: "Sema kiti. Sasa sema bila ki.", answer: "ti", options: ["ti", "kiti", "ki"] },
+    { practice: true, say: "Sema kuku. Sasa sema bila ku.", answer: "ku", options: ["ku", "kuku", "kuk"] },
+    { say: "Sema kitabu. Sasa sema bila ki.", answer: "tabu", options: ["tabu", "kitabu", "kita"] },
+    { say: "Sema mtoto. Sasa sema bila m.", answer: "toto", options: ["toto", "mtoto", "mto"] },
+    { say: "Sema shule. Sasa sema bila shu.", answer: "le", options: ["le", "shule", "shu"] },
+    { say: "Sema chakula. Sasa sema bila cha.", answer: "kula", options: ["kula", "chakula", "chaku"] },
+    { say: "Sema nyumba. Sasa sema bila nyu.", answer: "mba", options: ["mba", "nyumba", "nyum"] },
+    { say: "Sema samaki. Sasa sema bila sa.", answer: "maki", options: ["maki", "samaki", "sama"] },
+    { say: "Sema kalamu. Sasa sema bila ka.", answer: "lamu", options: ["lamu", "kalamu", "kala"] },
+    { say: "Sema mkate. Sasa sema bila m.", answer: "kate", options: ["kate", "mkate", "mka"] },
+    { say: "Sema jirani. Sasa sema bila ji.", answer: "rani", options: ["rani", "jirani", "jira"] },
+    { say: "Sema mwalimu. Sasa sema bila mwa.", answer: "limu", options: ["limu", "mwalimu", "mwali"] },
+  ],
+};
+const PHONEME_CFG = {
+  key: "phoneme", n: 5, tag: "Auditory · Phonological awareness", title: "Phoneme Deletion",
+  promptSw: "Sikiliza, kisha chagua sauti iliyobaki.", promptEn: "Listen, then pick what is left. Tap 🔊 to hear each choice.",
+  introSw: "Sikiliza neno, kisha uondoe sehemu.", introEn: "You will hear a word and what to take away. Tap the word that is left. Read aloud, so audio must be on.",
+  autoSpeak: true, optionAudio: true, showStimIn: [],
+  itemSpeech: (it) => it.say,
+  buildItems(lang) {
+    const set = PHONEME_SETS[lang] || PHONEME_SETS.en;
+    const prac = set.filter((x) => x.practice);
+    const real = shuffle(set.filter((x) => !x.practice)).slice(0, 12);
+    return [...prac, ...real].map((x) => ({ ...x, options: shuffle(x.options).map((w) => ({ label: w, value: w })) }));
+  },
+  renderStim: () => null,
+};
+
+/* ---------- Test 4: Nonsense word decoding (teacher-marked; child reads aloud) ---------- */
+// Pseudo-words: have a native-speaker teacher confirm none is a real word in your local language.
+const NONWORDS = {
+  en: { practice: ["sab", "tup"], items: ["mep", "drot", "blin", "fap", "jub", "sket", "tam", "vog", "plim", "stob"] },
+  sw: { practice: ["nafe", "pulo"], items: ["nepo", "luzo", "fogi", "bemu", "zilo", "vupe", "dega", "mopi", "sheku", "gunzi"] },
+};
+
+function NonwordTest({ speech, onComplete, onExit }) {
+  const [phase, setPhase] = useState("intro"); // intro | show | done
+  const [list, setList] = useState([]);
+  const [idx, setIdx] = useState(0);
+  const [summary, setSummary] = useState(null);
+  const trialsRef = useRef([]);
+  const shownAt = useRef(0);
+  const prompt = { en: "Read this made-up word out loud. It is not a real word.", sw: "Soma neno hili la kubuni kwa sauti. Si neno halisi." };
+
+  const start = () => {
+    const set = NONWORDS[speech.effLang] || NONWORDS.en;
+    trialsRef.current = [];
+    setList([...set.practice.map((w) => ({ w, practice: true })), ...shuffle(set.items).map((w) => ({ w, practice: false }))]);
+    setIdx(0);
+    setPhase("show");
+  };
+  useEffect(() => { if (phase === "show") shownAt.current = performance.now(); }, [phase, idx]);
+
+  const mark = (ok) => {
+    const it = list[idx];
+    trialsRef.current.push({ itemIndex: idx, word: it.w, practice: it.practice, correct: ok, markLatencyMs: Math.round(performance.now() - shownAt.current), lang: speech.effLang });
+    if (idx + 1 < list.length) setIdx(idx + 1);
+    else {
+      const scored = trialsRef.current.filter((t) => !t.practice);
+      const c = scored.filter((t) => t.correct).length;
+      const s = { score: Math.round((c / scored.length) * 100), correct: c, total: scored.length, lang: speech.effLang, note: `${c}/${scored.length} pseudo-words decoded (teacher-marked)` };
+      setSummary(s);
+      setPhase("done");
+      onComplete("nonword", s, trialsRef.current);
+    }
+  };
+
+  if (phase === "intro")
+    return (
+      <section className="card stage" style={{ textAlign: "center" }}>
+        <span className="tag">Test 4 of 7 · Reading</span>
+        <h1 style={{ margin: "8px 0" }}>Nonsense Word Decoding</h1>
+        <p>Soma maneno ya kubuni kwa sauti.</p>
+        <p className="small" style={{ margin: "6px 0 16px" }}>The learner reads made-up words aloud. The <b>teacher</b> taps whether each was read correctly; the learner never sees the marking. 2 practice words, then 10 scored. Tell the learner these are not real words.</p>
+        <div className="row wrap" style={{ justifyContent: "center" }}>
+          <button className="btn rose" onClick={() => speech.say(prompt)}>🔊 Sikiliza (Listen)</button>
+          <button className="btn" onClick={start}>Anza (Start) →</button>
+        </div>
+        {speech.swMissing && <p className="warn" style={{ marginTop: 12 }}>No Kiswahili voice found, so the English word list is used.</p>}
+      </section>
+    );
+
+  if (phase === "done")
+    return (
+      <section className="card stage" style={{ textAlign: "center" }}>
+        <h1>Hongera! Well done 🌟</h1>
+        <div className="card lo" style={{ margin: "16px 0" }}><div className="big">{summary.correct}/{summary.total}</div><p className="small">pseudo-words decoded</p></div>
+        <DoneButtons testKey="nonword" onExit={onExit} />
+      </section>
+    );
+
+  const it = list[idx];
+  const scoredTotal = list.filter((x) => !x.practice).length;
+  const scoredIdx = list.slice(0, idx + 1).filter((x) => !x.practice).length;
+  return (
+    <>
+      <section className="card">
+        <div className="row between">
+          <div className="grow"><span className="tag">Reading · Decoding</span><h2>Test 4 of 7: Nonsense Words</h2></div>
+          <span className="pill" style={{ background: "var(--accent-dk)" }}>{it.practice ? "Practice" : `Word ${scoredIdx} / ${scoredTotal}`}</span>
+        </div>
+        <div className="bar" style={{ marginTop: 10 }}><i style={{ width: `${Math.round((idx / list.length) * 100)}%` }} /></div>
+      </section>
+      <section className="card stage" style={{ display: "flex", flexDirection: "column", gap: 18, alignItems: "center", minHeight: 300, justifyContent: "center" }}>
+        <p className="small">Soma kwa sauti (Read aloud)</p>
+        <div className="word" aria-live="polite" style={{ fontSize: 64 }}>{it.w}</div>
+      </section>
+      <section className="card lo">
+        <h3 style={{ marginBottom: 10 }}>Mwalimu: je, alisoma sawa? (Teacher marks)</h3>
+        <div className="row">
+          <button className="btn grow" onClick={() => mark(true)}>✓ Sahihi (Correct)</button>
+          <button className="btn ghost grow" onClick={() => mark(false)}>Bado (Not yet)</button>
+        </div>
+      </section>
+    </>
+  );
+}
+
+/* ---------- Test 6: Rapid Automatised Naming (teacher-timed) ---------- */
+const RAN_ITEMS = 30; // 6 x 5 grid
+// PLACEHOLDER benchmark seconds for a 30-item grid. Replace with validated norms for age/grade.
+const RAN_BENCH = { colours: 21, numbers: 15, objects: 21 };
+const RAN_SETS = [
+  { key: "colours", label: "Rangi (Colours)", symbols: [["black", "#131f0f"], ["yellow", "#e8c514"], ["green", "#2f8f3a"], ["blue", "#2457c5"], ["red", "#c62828"]] },
+  { key: "numbers", label: "Nambari (Numbers)", symbols: ["2", "4", "6", "7", "9"] },
+  { key: "objects", label: "Vitu (Objects)", symbols: ["🐄", "🚌", "🍎", "🏠", "🌳"] },
+];
+function makeRanGrid(set) {
+  const out = [];
+  while (out.length < RAN_ITEMS) {
+    const s = set.symbols[Math.floor(Math.random() * set.symbols.length)];
+    if (out.length && out[out.length - 1] === s) continue;
+    out.push(s);
+  }
+  return out;
+}
+
+function RanTest({ speech, onComplete, onExit }) {
+  const [phase, setPhase] = useState("intro"); // intro | ready | running | errors | done
+  const [si, setSi] = useState(0);
+  const [grids, setGrids] = useState([]);
+  const [elapsed, setElapsed] = useState(0);
+  const [errs, setErrs] = useState(0);
+  const [summary, setSummary] = useState(null);
+  const startRef = useRef(0);
+  const finalMs = useRef(0);
+  const setResults = useRef([]);
+
+  useEffect(() => {
+    if (phase !== "running") return undefined;
+    const id = setInterval(() => setElapsed(performance.now() - startRef.current), 100);
+    return () => clearInterval(id);
+  }, [phase]);
+
+  const begin = () => { setGrids(RAN_SETS.map(makeRanGrid)); setSi(0); setPhase("ready"); setElapsed(0); setErrs(0); setResults.current = []; };
+  const run = () => { startRef.current = performance.now(); setElapsed(0); setPhase("running"); };
+  const stop = () => { finalMs.current = performance.now() - startRef.current; setElapsed(finalMs.current); setErrs(0); setPhase("errors"); };
+  const redo = () => { setElapsed(0); setPhase("ready"); };
+  const saveSet = () => {
+    const set = RAN_SETS[si];
+    const sec = finalMs.current / 1000;
+    const score = Math.round(Math.min(100, (100 * RAN_BENCH[set.key]) / (sec + 2 * errs))); // each error costs 2 s
+    setResults.current.push({ set: set.key, ms: Math.round(finalMs.current), errors: errs, items: RAN_ITEMS, score });
+    if (si + 1 < RAN_SETS.length) { setSi(si + 1); setElapsed(0); setPhase("ready"); return; }
+    const rs = setResults.current;
+    const s = {
+      score: Math.round(mean(rs.map((r) => r.score))),
+      note: rs.map((r) => `${r.set} ${(r.ms / 1000).toFixed(1)}s/${r.errors}err`).join(", "),
+      sets: rs,
+    };
+    setSummary(s);
+    setPhase("done");
+    onComplete("ran", s, rs);
+  };
+
+  if (phase === "intro")
+    return (
+      <section className="card stage" style={{ textAlign: "center" }}>
+        <span className="tag">Test 6 of 7 · Naming speed</span>
+        <h1 style={{ margin: "8px 0" }}>Rapid Automatised Naming</h1>
+        <p>Taja haraka iwezekanavyo, kutoka kushoto kwenda kulia.</p>
+        <p className="small" style={{ margin: "6px 0 16px" }}>Three grids (colours, numbers, objects). The learner names every item aloud, left to right, as fast as they can. The <b>teacher</b> presses Start and Stop and counts naming errors. Grids stay hidden until Start.</p>
+        <button className="btn" onClick={begin}>Anza (Start) →</button>
+      </section>
+    );
+
+  if (phase === "done")
+    return (
+      <section className="card stage" style={{ textAlign: "center" }}>
+        <h1>Hongera! Well done 🌟</h1>
+        <div className="card lo" style={{ margin: "16px 0" }}>
+          {summary.sets.map((r) => <p key={r.set} className="small"><b>{r.set}</b>: {(r.ms / 1000).toFixed(1)} s, {r.errors} error(s)</p>)}
+        </div>
+        <DoneButtons testKey="ran" onExit={onExit} />
+      </section>
+    );
+
+  const set = RAN_SETS[si];
+  const grid = grids[si] || [];
+  const hidden = phase === "ready";
+  return (
+    <>
+      <section className="card">
+        <div className="row between">
+          <div className="grow"><span className="tag">Naming speed · Teacher timed</span><h2>Test 6 of 7: {set.label}</h2></div>
+          <span className="pill" style={{ background: "var(--accent-dk)" }}>Set {si + 1} / 3</span>
+        </div>
+      </section>
+      <section className="card stage" style={{ display: "flex", flexDirection: "column", gap: 14, alignItems: "center" }}>
+        <p className="small">Taja kila kitu kwa sauti (Name each one aloud)</p>
+        <div className={`ran ${hidden ? "mask" : ""}`} aria-hidden={hidden}>
+          {grid.map((s, i) => (
+            <span key={i} aria-label={Array.isArray(s) ? s[0] : undefined}>
+              {Array.isArray(s) ? <i style={{ width: 28, height: 28, borderRadius: "50%", background: s[1], display: "block" }} /> : s}
+            </span>
+          ))}
+        </div>
+        <div className="big" role="timer" aria-live="off">{(elapsed / 1000).toFixed(1)}s</div>
+      </section>
+      <section className="card lo">
+        {phase === "ready" && <button className="btn block" onClick={run}>▶ Mwalimu: Anza (Start timer)</button>}
+        {phase === "running" && <button className="btn rose block" onClick={stop}>■ Simamisha (Stop)</button>}
+        {phase === "errors" && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <h3>Time: {(elapsed / 1000).toFixed(1)} s. Naming errors?</h3>
+            <div className="row" style={{ justifyContent: "center" }}>
+              <button className="key" style={{ width: 64 }} onClick={() => setErrs(Math.max(0, errs - 1))} aria-label="Fewer errors">−</button>
+              <div className="big" style={{ minWidth: 70, textAlign: "center" }}>{errs}</div>
+              <button className="key" style={{ width: 64 }} onClick={() => setErrs(errs + 1)} aria-label="More errors">+</button>
+            </div>
+            <div className="row"><button className="btn ghost grow" onClick={redo}>↻ Redo this set</button><button className="btn grow" onClick={saveSet}>{si + 1 < RAN_SETS.length ? "Save & next set →" : "Save & finish ✓"}</button></div>
+          </div>
+        )}
+      </section>
+    </>
+  );
+}
+
+const MappingTest = (p) => <ChoiceTest cfg={MAPPING_CFG} {...p} />;
+const ArithmeticTest = (p) => <ChoiceTest cfg={ARITH_CFG} {...p} />;
+const PhonemeTest = (p) => <ChoiceTest cfg={PHONEME_CFG} {...p} />;
 
 /* ---------- Screen 4: Profile, IEP editor, PDF export ---------- */
 function ReportScreen({ learner, session, results, iep, onIepChange, onSave, onExport, notify }) {
@@ -1268,11 +1790,13 @@ function ReportScreen({ learner, session, results, iep, onIepChange, onSave, onE
 
 /* ---------- App shell + state transitions ---------- */
 const DEFAULT_LEARNER = { id: null, code: "STU-NBO-0001", grade: "4", age: "9", school: "", assessor: "" };
+const SCREENS = { subitizing: SubitizingTest, mapping: MappingTest, arithmetic: ArithmeticTest, nonword: NonwordTest, phoneme: PhonemeTest, ran: RanTest, digitspan: DigitSpanTest };
+// Bottom-nav groups: "Direct Test" = on-screen tasks, "Auditory" = read-aloud / memory tasks.
 const NAV = [
-  { key: "dashboard", icon: "🏠", label: "Dashboard" },
-  { key: "subitizing", icon: "🔵", label: "Direct Test" },
-  { key: "digitspan", icon: "👂", label: "Auditory" },
-  { key: "report", icon: "📄", label: "IEP / EARC" },
+  { key: "dashboard", icon: "🏠", label: "Dashboard", group: ["dashboard"] },
+  { key: "direct", icon: "🔵", label: "Direct Test", group: ["subitizing", "mapping", "arithmetic", "nonword", "ran"] },
+  { key: "auditory", icon: "👂", label: "Auditory", group: ["phoneme", "digitspan"] },
+  { key: "report", icon: "📄", label: "IEP / EARC", group: ["report"] },
 ];
 
 export default function App() {
@@ -1340,7 +1864,7 @@ export default function App() {
   }, [store, loadLearner]);
 
   const go = (s) => { speech.stop(); setScreen(s); window.scrollTo?.(0, 0); };
-  const launch = (key) => { setTestKey((k) => k + 1); go(key === "digitspan" ? "digitspan" : "subitizing"); };
+  const launch = (key) => { setTestKey((k) => k + 1); go(SCREENS[key] ? key : "dashboard"); };
   const persistSetting = (k, v) => store(() => setSetting(k, v));
 
   const onComplete = async (key, summary, trials) => {
@@ -1348,8 +1872,12 @@ export default function App() {
     if (session.id) await store(async () => { await saveTrials(session.id, key, trials); await saveTestResult(session.id, key, summary); });
   };
   const onExitTest = (to) => {
-    if (to === "digitspan") launch("digitspan");
+    if (to && SCREENS[to]) launch(to);
     else go(to === "report" ? "report" : "dashboard");
+  };
+  const navTo = (n) => {
+    if (n.key === "dashboard" || n.key === "report") return go(n.key);
+    launch(n.group.find((k) => !results[k]) || n.group[0]); // first unfinished test in the group
   };
 
   const saveLearnerForm = async (f) => {
@@ -1401,12 +1929,12 @@ export default function App() {
       <header className="hdr">
         <div className="row between wrap">
           <div className="grow"><div className="brand">CBC SNE Screener</div><div className="sub">Dyslexia & dyscalculia functional screening</div></div>
-          <span className={`pill ${online ? "" : "off"}`}><span className="dot" />{online ? "Online · data saved on device" : "Nje ya Mtandao · Offline, saved locally"}</span>
+          <span className={`pill ${online ? "" : "off"}`}><span className="dot" />{online ? "Online · saved on device" : "Offline · saved locally"}</span>
         </div>
         <div className="row wrap" style={{ marginTop: 6 }}>
-          <button className="pill btn" aria-pressed={dys} onClick={() => { setDys(!dys); persistSetting("dyslexic", !dys); }}>Aa OpenDyslexic</button>
-          <button className="pill btn" aria-pressed={audioOn} onClick={() => { setAudioOn(!audioOn); persistSetting("audio", !audioOn); if (audioOn) speech.stop(); }}>🔊 Audio {audioOn ? "on" : "off"}</button>
-          <button className="pill btn" aria-label="Speech language" onClick={() => { const n = lang === "en" ? "sw" : "en"; setLang(n); persistSetting("lang", n); }}>🗣 {lang === "en" ? "English" : "Kiswahili"}</button>
+          <button className="pill btn" aria-pressed={dys} onClick={() => { setDys(!dys); persistSetting("dyslexic", !dys); }}>Aa Dyslexic font</button>
+          <button className="pill btn" aria-pressed={audioOn} onClick={() => { setAudioOn(!audioOn); persistSetting("audio", !audioOn); if (audioOn) speech.stop(); }}>🔊 {audioOn ? "On" : "Off"}</button>
+          <button className="pill btn" aria-label="Speech language" onClick={() => { const n = lang === "en" ? "sw" : "en"; setLang(n); persistSetting("lang", n); }}>🗣 {lang === "en" ? "EN" : "SW"}</button>
         </div>
         {!storageOk && <p className="warn" style={{ marginTop: 6 }}>Local storage is unavailable (private window or blocked). Results will be lost when you close this tab.</p>}
       </header>
@@ -1416,8 +1944,7 @@ export default function App() {
           <Dashboard learner={learner} session={session} results={results} speech={speech}
             onSaveLearner={saveLearnerForm} onLaunch={launch} onNewRun={newRun} onSample={loadSample} onDelete={deleteData} />
         )}
-        {screen === "subitizing" && <SubitizingTest key={`s${testKey}`} speech={speech} onComplete={onComplete} onExit={onExitTest} />}
-        {screen === "digitspan" && <DigitSpanTest key={`d${testKey}`} speech={speech} onComplete={onComplete} onExit={onExitTest} />}
+        {SCREENS[screen] && React.createElement(SCREENS[screen], { key: `${screen}${testKey}`, speech, onComplete, onExit: onExitTest })}
         {screen === "report" && (
           <ReportScreen learner={learner} session={session} results={results} iep={iep} notify={notify}
             onIepChange={onIepChange} onSave={saveIepNow} onExport={(kind) => exportPdf(kind, { learner, session, results, iep })} />
@@ -1426,7 +1953,7 @@ export default function App() {
 
       <nav className="nav" aria-label="Screens">
         {NAV.map((n) => (
-          <button key={n.key} aria-current={screen === n.key ? "page" : undefined} onClick={() => (n.key === "subitizing" || n.key === "digitspan" ? launch(n.key) : go(n.key))}>
+          <button key={n.key} aria-current={n.group.includes(screen) ? "page" : undefined} onClick={() => navTo(n)}>
             <span className="ic" aria-hidden="true">{n.icon}</span>{n.label}
           </button>
         ))}
