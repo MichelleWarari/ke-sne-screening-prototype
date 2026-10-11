@@ -1,3 +1,4 @@
+[README.md](https://github.com/user-attachments/files/33301274/README.md)
 # KE SNE Screening Prototype
 
 Offline-first functional screening prototype for **dyslexia and dyscalculia indicators** in Kenyan primary schools (CBC framework). Built from a Google Stitch design export.
@@ -7,15 +8,25 @@ Offline-first functional screening prototype for **dyslexia and dyscalculia indi
 **Live demo:** _add your GitHub Pages link here after deploying_
 
 ## What works today
-| Screen | Status |
-|---|---|
-| Dashboard, learner details, run management | Working |
-| Test 1: Subitizing & dot comparison, with `performance.now()` reaction timing | Working |
-| Test 7: Digit span, spoken via the Web Speech API (English / Kiswahili) | Working |
-| IEP editor, EARC referral toggle, PDF export (IEP document and EARC slip) | Working |
-| Tests 2-6 (symbol mapping, arithmetic, nonword decoding, phoneme deletion, RAN) | Not built yet |
+All seven screening tasks, the IEP editor and PDF export work. Everything is stored on-device.
+
+| # | Test | How it is scored |
+|---|---|---|
+| 1 | Subitizing & dot comparison (1-6 dots) | % correct, `performance.now()` reaction times |
+| 2 | Symbol-quantity mapping (numerals 1-20, dots and ten-frames) | % correct, reaction times |
+| 3 | Single-digit arithmetic fluency | % correct, reaction times |
+| 4 | Nonsense word decoding | **Teacher marks** each word the learner reads aloud |
+| 5 | Phoneme / syllable deletion, read aloud (Web Speech API) | % correct, reaction times |
+| 6 | Rapid automatised naming (colours, numbers, objects) | **Teacher times** each grid and counts errors |
+| 7 | Digit span (forward), spoken digits | Longest correct span / 6 |
 
 "Load sample results" on the dashboard fills all 7 tests so you can preview the report; sample PDFs are watermarked.
+
+### Content that needs expert review before real use
+- **Score bands** (75+ on track, 50-74 monitor, below 50 priority) are placeholders, not validated norms.
+- **RAN benchmarks** (`RAN_BENCH`) are placeholder seconds for a 30-item grid. Replace with norms for the learner's age or grade.
+- **Kiswahili item sets** (`PHONEME_SETS.sw`, `NONWORDS.sw`) and the Kiswahili prompts should be reviewed by a native-speaker teacher. Check that no pseudo-word is a real word locally.
+- Tests 4 and 6 are teacher-administered because offline speech recognition is not reliable.
 
 ## Run locally
 ```bash
